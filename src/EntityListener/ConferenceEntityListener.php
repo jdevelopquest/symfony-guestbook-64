@@ -12,9 +12,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[AsEntityListener(event: Events::preUpdate, entity: Conference::class)]
 class ConferenceEntityListener
 {
-    public function __construct(
-        private SluggerInterface $slugger,
-    ) {
+    public function __construct(private SluggerInterface $slugger) {
     }
 
     public function prePersist(Conference $conference, LifecycleEventArgs $event)
