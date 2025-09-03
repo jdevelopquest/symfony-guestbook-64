@@ -56,11 +56,15 @@ final class ConferenceController extends AbstractController
 	            'referrer' => $request->headers->get('referer'),
 	            'permalink' => $request->getUri(),
 	        ];
+	        
 	        $spamScore = $spamChecker->getSpamScore($comment, $context);
-	        if (2 === $spamScore || 1 === $spamScore) {
+	        if (2 === $spamScore) {
 	            throw new \RuntimeException('Blatant spam, go away!');
 	        }
-
+	        if (1 === $spamScore) {
+	            throw new \RuntimeException('The comment is considered spam.');
+	        }
+	        
     		$this->entityManager->flush();
 
     		return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
