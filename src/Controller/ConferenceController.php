@@ -61,9 +61,11 @@ final class ConferenceController extends AbstractController
 	        if (2 === $spamScore) {
 	            throw new \RuntimeException('Blatant spam, go away!');
 	        }
+	        /*
 	        if (1 === $spamScore) {
 	            throw new \RuntimeException('The comment is considered spam.');
 	        }
+	        */
 	        
     		$this->entityManager->flush();
 
