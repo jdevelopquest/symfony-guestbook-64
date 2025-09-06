@@ -24,7 +24,9 @@ class CommentRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('c')
             ->andWhere('c.conference = :conference')
+            ->andWhere('c.state = :state')
             ->setParameter('conference', $conference)
+            ->setParameter('state', 'published')
             ->orderBy('c.createdAt', 'DESC')
             ->setMaxResults(self::COMMENTS_PER_PAGE)
             ->setFirstResult($offset)
@@ -34,28 +36,31 @@ class CommentRepository extends ServiceEntityRepository
         return new Paginator($query);
     }
 
-    //    /**
-    //     * @return Comment[] Returns an array of Comment objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Comment
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+	/**
+	 * @return Comment[] Returns an array of Comment objects
+	 */
+/*
+	public function findByExampleField($value): array
+	{
+	    return $this->createQueryBuilder('c')
+		->andWhere('c.exampleField = :val')
+		->setParameter('val', $value)
+		->orderBy('c.id', 'ASC')
+		->setMaxResults(10)
+		->getQuery()
+		->getResult()
+	    ;
+	}
+*/
+/*
+	public function findOneBySomeField($value): ?Comment
+	{
+	    return $this->createQueryBuilder('c')
+		->andWhere('c.exampleField = :val')
+		->setParameter('val', $value)
+		->getQuery()
+		->getOneOrNullResult()
+	    ;
+	}
+*/
 }
