@@ -18,8 +18,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ConferenceController extends AbstractController
 {
-	public function __construct(private EntityManagerInterface $entityManager,
-	private MessageBusInterface $bus,
+	public function __construct(
+	    private EntityManagerInterface $entityManager,
+	    private MessageBusInterface $bus,
 	)
 	{
 	}
