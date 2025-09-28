@@ -18,52 +18,61 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ConferenceController extends AbstractController
 {
-	public function __construct(
-	    private EntityManagerInterface $entityManager,
-	    private MessageBusInterface $bus,
-	)
-	{
-	}
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly MessageBusInterface    $bus,
+    )
+    {
+    }
 
     #[Route('/', name: 'homepage')]
     public function index(ConferenceRepository $conferenceRepository): Response
     {
         return $this->render('conference/index.html.twig', [
             'conferences' => $conferenceRepository->findAll(),
-        ]);
+        ])->setSharedMaxAge(3600);
+    }
+
+    #[Route('/conference_header', name: 'conference_header')]
+    public function conferenceHeader(ConferenceRepository $conferenceRepository): Response
+    {
+        return $this->render('conference/header.html.twig', [
+            'conferences' => $conferenceRepository->findAll(),
+        ])->setSharedMaxAge(3600);
     }
 
     #[Route('/conference/{slug}', name: 'conference')]
     public function show(
-    	Request $request,
-    	Conference $conference,
-    	CommentRepository $commentRepository,
-    	#[Autowire('%photo_dir%')] string $photoDir,
-    ): Response {
-    	$comment = new Comment();
-    	$form = $this->createForm(CommentType::class, $comment);
-    	$form->handleRequest($request);
-    	if ($form->isSubmitted() && $form->isValid()) {
-    		$comment->setConference($conference);
-    		if ($photo = $form['photo']->getData()) {
-    			$filename = bin2hex(random_bytes(6)).'.'.$photo->guessExtension();
-    			$photo->move($photoDir, $filename);
-    			$comment->setPhotoFilename($filename);
-    		}
+        Request                           $request,
+        Conference                        $conference,
+        CommentRepository                 $commentRepository,
+        #[Autowire('%photo_dir%')] string $photoDir,
+    ): Response
+    {
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setConference($conference);
+            if ($photo = $form['photo']->getData()) {
+                $filename = bin2hex(random_bytes(6)) . '.' . $photo->guessExtension();
+                $photo->move($photoDir, $filename);
+                $comment->setPhotoFilename($filename);
+            }
 
-    		$this->entityManager->persist($comment);
-	        $this->entityManager->flush();
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
 
-	        $context = [
-	            'user_ip' => $request->getClientIp(),
-	            'user_agent' => $request->headers->get('user-agent'),
-	            'referrer' => $request->headers->get('referer'),
-	            'permalink' => $request->getUri(),
-	        ];
-	        $this->bus->dispatch(new CommentMessage($comment->getId(), $context));
+            $context = [
+                'user_ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('user-agent'),
+                'referrer' => $request->headers->get('referer'),
+                'permalink' => $request->getUri(),
+            ];
+            $this->bus->dispatch(new CommentMessage($comment->getId(), $context));
 
-    		return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
-    	}
+            return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
+        }
 
         $offset = max(0, $request->query->getInt('offset', 0));
         $paginator = $commentRepository->getCommentPaginator($conference, $offset);
